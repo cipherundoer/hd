@@ -1,5 +1,5 @@
 *.o
-hd
+./hd
 
 *.out
 *.txt
