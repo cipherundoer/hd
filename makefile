@@ -1,4 +1,4 @@
-int_print: int_print.o
-	ld -melf_x86_64 -o int_print int_print.o
-int_print.o: int_print.asm
-	nasm -felf64 -o int_print.o int_print.asm
+hd: hd.o
+	ld -melf_x86_64 -o hd hd.o
+hd.o: hd.asm
+	nasm -felf64 -o hd.o hd.asm
