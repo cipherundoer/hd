@@ -1,10 +1,14 @@
  section .data
-    ;FIXME: perhaps put these in a register to avoid memory writes
     lu_table db "0123456789ABCDEF"
     
 section .bss
-    buffer_size equ 65000000
-    buffer resb buffer_size 
+    ; At the moment, we have hard coded the amount of memory we are going to 
+    ; allocate for the input and output buffer.
+    ; Ideally we would imlement some sort of memory management functionality to
+    ; dynamically grow the size of the allocated space as needed, but this will
+    ; do for now 
+    buffer_size equ 65000000      ;"65Mb"
+    input_buffer resb buffer_size 
     output_buffer resb buffer_size 
 
 section .text
@@ -12,22 +16,19 @@ section .text
 _start:
 
     ; base addr
-    lea r13, [lu_table]            ; setup lookup table pointer
-    lea r10, [output_buffer]
+    lea r13, lu_table         ; setup lookup table pointer
+    lea r10, output_buffer
 
 
 Read_from_stdin:
-    ; Read syscall
-    mov rsi, buffer
     mov rdi, 0                  ; file descriptor for stdin
-    mov rdx, buffer_size        ; passing the count to read (same as stack allocation)
     mov rax, 0                  ; syscall for linux Read
+    mov rsi, input_buffer       ; store a pointer to the input buffer in rsi for 
+    mov rdx, buffer_size        ; passing the count to read (same as stack allocation)
     syscall
     mov r12, rax                ; r12 is the number of bytes read
-    sub r12, 1
     test rax, rax
     js Failed_to_read 
-    ; jne Read_from_stdin 
 
 
     xor r15, r15                ; x15 is used as a index into the data on the stack
@@ -48,7 +49,7 @@ Process_byte:
                                 ; on the second (higher) nybble
     xor rbx, rbx
     mov bl, byte [r13 + rdx]
-    mov byte [r10+r11], bl              ; FIXME! attemt to store the resulting byte into the stack!
+    mov byte [r10+r11], bl      ; FIXME! attemt to store the resulting byte into the stack!
     ; ----------------------
     
     add r11, 2
